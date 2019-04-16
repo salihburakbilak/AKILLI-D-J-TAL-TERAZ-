@@ -1,0 +1,73 @@
+import RPi.GPIO as GPIO
+import time
+
+NUM_CYCLES = 10
+
+
+def setup():
+  GPIO.setmode(GPIO.BOARD)
+  GPIO.setup(37,GPIO.IN, pull_up_down=GPIO.PUD_UP)
+  GPIO.setup(33,GPIO.OUT)
+  GPIO.setup(35,GPIO.OUT)
+  print("\n")
+  
+def loop():
+  temp = 1
+  while(1):  
+
+    GPIO.output(33,GPIO.LOW)
+    GPIO.output(35,GPIO.LOW)
+    time.sleep(0.3)
+    start = time.time()
+    for impulse_count in range(NUM_CYCLES):
+      GPIO.wait_for_edge(37, GPIO.FALLING)
+    duration = time.time() - start 
+    red  = NUM_CYCLES / duration   
+   
+    GPIO.output(33,GPIO.LOW)
+    GPIO.output(35,GPIO.HIGH)
+    time.sleep(0.3)
+    start = time.time()
+    for impulse_count in range(NUM_CYCLES):
+      GPIO.wait_for_edge(37, GPIO.FALLING)
+    duration = time.time() - start
+    blue = NUM_CYCLES / duration
+    
+
+    GPIO.output(33,GPIO.HIGH)
+    GPIO.output(35,GPIO.HIGH)
+    time.sleep(0.3)
+    start = time.time()
+    for impulse_count in range(NUM_CYCLES):
+      GPIO.wait_for_edge(37, GPIO.FALLING)
+    duration = time.time() - start
+    green = NUM_CYCLES / duration
+    
+      
+    if green<11000 and blue<15000 and red>19000:
+      print("red")
+      temp=1
+    elif red<14000 and  blue<16000 and green>15000:
+      print("green")
+      temp=1
+    elif green<10000 and red<11000 and blue>12000:
+      print("blue")
+      temp=1
+    elif red>10000 and green>10000 and blue>10000 and temp==1:
+      print("yesil ve urun marul")
+ 
+      temp=0
+
+
+def endprogram():
+    GPIO.cleanup()
+
+if __name__=='__main__':
+    
+    setup()
+
+    try:
+        loop()
+
+    except KeyboardInterrupt:
+        endprogram()
